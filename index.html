@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রিমিয়াম কন্টেন্ট আনলক সিস্টেম</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .timer-box {
+            background: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        #timer {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .ad-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .access-granted {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .countdown {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .admin-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.1);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .admin-link a {
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <h1>🌟 প্রিমিয়াম কন্টেন্ট আনলক</h1>
+        
+        <div v-if="!hasAccess">
+            <div class="timer-box">
+                <div id="timer">{{ formattedTime }}</div>
+                <p>এড দেখতে বাকি</p>
+            </div>
+            
+            <div class="ad-container">
+                <p>একটি এড দেখে ২৪ ঘন্টা এক্সেস পান!</p>
+                <button class="btn" @click="watchAd" :disabled="isWatching">
+                    {{ isWatching ? 'এড চলছে...' : 'এড দেখুন' }}
+                </button>
+            </div>
+        </div>
+        
+        <div v-else class="access-granted">
+            <h2>🎉 এক্সেস গ্রান্টেড!</h2>
+            <p>আপনার প্রিমিয়াম কন্টেন্ট এখানে থাকবে</p>
+            <div class="countdown">
+                এক্সেস শেষ হবে: {{ remainingTime }}
+            </div>
+        </div>
+        
+        <div class="countdown" v-if="hasAccess">
+            <p>আজকের জন্য আর এড দেখতে হবে না</p>
+        </div>
+        
+        <div class="admin-link">
+            <a href="/admin">🔐 এডমিন প্যানেল</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                hasAccess: false,
+                isWatching: false,
+                timeLeft: 10,
+                accessUntil: null,
+                timer: null
+            },
+            computed: {
+                formattedTime() {
+                    return `${this.timeLeft} সেকেন্ড`;
+                },
+                remainingTime() {
+                    if (!this.accessUntil) return '';
+                    const remaining = this.accessUntil - Date.now();
+                    if (remaining <= 0) return 'এক্সেস শেষ';
+                    
+                    const hours = Math.floor(remaining / (1000 * 60 * 60));
+                    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                    return `${hours} ঘন্টা ${minutes} মিনিট`;
+                }
+            },
+            methods: {
+                async watchAd() {
+                    this.isWatching = true;
+                    this.timeLeft = 10;
+                    
+                    // টাইমার স্টার্ট
+                    this.timer = setInterval(() => {
+                        this.timeLeft--;
+                        if (this.timeLeft <= 0) {
+                            clearInterval(this.timer);
+                            this.completeAd();
+                        }
+                    }, 1000);
+                    
+                    // এড নেটওয়ার্ক স্ক্রিপ্ট লোড
+                    var adScript = document.createElement('script');
+                    adScript.type = 'text/javascript';
+                    adScript.src = '//www.effectivegatecpm.com/ksvhh1d1u?key=84bc07cb571999eb2f4a1357901d8702';
+                    document.body.appendChild(adScript);
+                },
+                
+                async completeAd() {
+                    this.isWatching = false;
+                    
+                    try {
+                        const response = await axios.post('/api/grant-access', {
+                            userId: this.getUserId()
+                        });
+                        
+                        if (response.data.success) {
+                            this.hasAccess = true;
+                            this.accessUntil = response.data.accessUntil;
+                            localStorage.setItem('accessUntil', this.accessUntil);
+                        }
+                    } catch (error) {
+                        console.error('এক্সেস গ্রান্ট করতে সমস্যা:', error);
+                        alert('এক্সেস গ্রান্ট করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                    }
+                },
+                
+                getUserId() {
+                    // ইউজার আইডি জেনারেট বা লোকাল স্টোরেজ থেকে নেওয়া
+                    let userId = localStorage.getItem('userId');
+                    if (!userId) {
+                        userId = 'user_' + Math.random().toString(36).substr(2, 9);
+                        localStorage.setItem('userId', userId);
+                    }
+                    return userId;
+                },
+                
+                checkAccess() {
+                    const savedAccess = localStorage.getItem('accessUntil');
+                    if (savedAccess) {
+                        const accessTime = parseInt(savedAccess);
+                        if (accessTime > Date.now()) {
+                            this.hasAccess = true;
+                            this.accessUntil = accessTime;
+                        }
+                    }
+                }
+            },
+            mounted() {
+                this.checkAccess();
+            }
+        });
+    </script>
+</body>
+</html>
